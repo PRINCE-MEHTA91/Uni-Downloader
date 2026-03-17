@@ -11,10 +11,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const ytDlpPath =
-"C:\\Users\\91914\\AppData\\Roaming\\Python\\Python313\\Scripts\\yt-dlp.exe";
+const YTDlpWrap = require('yt-dlp-wrap').default;
 
-const ytDlp = new YTDlpWrap(ytDlpPath);
+const ytDlp = new YTDlpWrap(); 
 
 
 // ================= VIDEO INFO =================
