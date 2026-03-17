@@ -11,26 +11,43 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 const ytDlp = new YTDlpWrap();
-ytDlp.getVersion().catch(async () => {
-    console.log("Downloading yt-dlp...");
-    await YTDlpWrap.downloadFromGithub();
-});
+
+// 🔥 Ensure yt-dlp is installed before server starts
+async function initYtDlp() {
+    try {
+        await ytDlp.getVersion();
+        console.log("yt-dlp already installed");
+    } catch (err) {
+        console.log("Downloading yt-dlp...");
+        try {
+            await YTDlpWrap.downloadFromGithub();
+            console.log("yt-dlp downloaded successfully");
+        } catch (downloadErr) {
+            console.error("yt-dlp download failed:", downloadErr);
+        }
+    }
+}
+
 
 // ================= VIDEO INFO =================
 
 app.post("/video-info", async (req, res) => {
-    const { url } = req.body;
-
-    if (!url) {
-        return res.status(400).json({ error: "Video URL required" });
-    }
-
     try {
+        const { url } = req.body;
+
+        if (!url) {
+            return res.status(400).json({ error: "Video URL required" });
+        }
+
         const metadata = await ytDlp.getVideoInfo(url);
+
         res.json(metadata);
+
     } catch (error) {
         console.error("yt-dlp error:", error);
-        res.status(500).json({ error: "Failed to fetch video information" });
+        res.status(500).json({
+            error: "Failed to fetch video information"
+        });
     }
 });
 
@@ -38,13 +55,13 @@ app.post("/video-info", async (req, res) => {
 // ================= DOWNLOAD =================
 
 app.get("/download", async (req, res) => {
-    const { url, formatId } = req.query;
-
-    if (!url || !formatId) {
-        return res.status(400).send("Missing parameters");
-    }
-
     try {
+        const { url, formatId } = req.query;
+
+        if (!url || !formatId) {
+            return res.status(400).send("Missing parameters");
+        }
+
         const metadata = await ytDlp.getVideoInfo(url);
         const title = metadata.title.replace(/[^a-z0-9]/gi, "_");
         const filename = `${title}.mp4`;
@@ -52,7 +69,6 @@ app.get("/download", async (req, res) => {
         res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
         res.setHeader("Content-Type", "video/mp4");
 
-        // ✅ FIX: use execStream instead of spawn + path
         const stream = ytDlp.execStream([
             "-f", formatId,
             "-o", "-",
@@ -75,8 +91,10 @@ app.get("/download", async (req, res) => {
 });
 
 
-// ================= SERVER =================
+// ================= START SERVER =================
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+initYtDlp().then(() => {
+    app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+    });
 });
