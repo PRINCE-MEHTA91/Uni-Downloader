@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Universal Video Downloader
 
 This is a modern web application that allows users to download videos from various online platforms in different formats.
@@ -60,3 +61,6 @@ This is a modern web application that allows users to download videos from vario
 2.  **Get Info:** Click the "Get Video Info" button.
 3.  **Select Format:** The application will display the video's thumbnail, title, and a list of available download formats with their respective file sizes.
 4.  **Download:** Click the "Download" button next to your desired format. The download will start automatically in your browser.
+=======
+# Uni-Downloader
+>>>>>>> ecc70ca7bedc5f0495e9c6455a7a2c53cb6ed5c1
