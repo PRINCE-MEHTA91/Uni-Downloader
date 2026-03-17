@@ -11,7 +11,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 const ytDlp = new YTDlpWrap();
-
+ytDlp.getVersion().catch(async () => {
+    console.log("Downloading yt-dlp...");
+    await YTDlpWrap.downloadFromGithub();
+});
 
 // ================= VIDEO INFO =================
 
